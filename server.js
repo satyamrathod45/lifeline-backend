@@ -23,7 +23,7 @@ const server = http.createServer(app)
 // Socket Server
 export const io = new Server(server,{
   cors:{
-    origin:"http://localhost:5173",
+    origin:"https://satyamrathod45.github.io/",
     credentials:true
   }
 })
@@ -80,7 +80,7 @@ connectDB()
 
 app.use(
   cors({
-    origin:"http://localhost:5173",
+    origin:"http://satyamrathod45.github.io/",
     credentials:true
   })
 )
