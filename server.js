@@ -79,10 +79,7 @@ connectDB()
 // ==============================
 
 app.use(
-  cors({
-    origin:"http://satyamrathod45.github.io/",
-    credentials:true
-  })
+  cors()
 )
 
 app.use(express.json())
