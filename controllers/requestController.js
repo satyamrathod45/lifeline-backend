@@ -1,5 +1,12 @@
-import BloodRequest from "../models/BloodRequest.js";
+import BloodRequest from "../models/BloodRequest.js"
 
+
+
+/*
+=============================
+CREATE BLOOD REQUEST
+=============================
+*/
 export const createRequest = async (req, res) => {
 
   try {
@@ -12,7 +19,7 @@ export const createRequest = async (req, res) => {
       area,
       unitsNeeded,
       coordinates
-    } = req.body;
+    } = req.body
 
     const request = new BloodRequest({
 
@@ -30,15 +37,15 @@ export const createRequest = async (req, res) => {
         coordinates
       }
 
-    });
+    })
 
-    await request.save();
+    await request.save()
 
     res.status(201).json({
       success: true,
-      message: "Blood request created",
+      message: "Blood request created successfully",
       request
-    });
+    })
 
   } catch (error) {
 
@@ -46,40 +53,33 @@ export const createRequest = async (req, res) => {
       success: false,
       message: "Server error",
       error: error.message
-    });
+    })
 
   }
 
-};
+}
 
 
 
-export const getNearbyRequests = async (req, res) => {
+/*
+=============================
+GET ALL REQUESTS
+=============================
+*/
+export const getAllRequests = async (req, res) => {
 
   try {
 
-    const { lat, lng } = req.query;
-
-    const requests = await BloodRequest.find({
-      status: "pending",
-      location: {
-        $near: {
-          $geometry: {
-            type: "Point",
-            coordinates: [parseFloat(lng), parseFloat(lat)]
-          },
-          $maxDistance: 10000
-        }
-      }
-    })
-    .populate("requestedBy", "name phone")
-    .select("-__v");
+    const requests = await BloodRequest.find()
+      .populate("requestedBy", "name phone")
+      .populate("acceptedBy", "name phone")
+      .sort({ createdAt: -1 })
 
     res.json({
       success: true,
       total: requests.length,
       requests
-    });
+    })
 
   } catch (error) {
 
@@ -87,78 +87,92 @@ export const getNearbyRequests = async (req, res) => {
       success: false,
       message: "Server error",
       error: error.message
-    });
+    })
 
   }
 
-};
+}
 
 
 
+/*
+=============================
+ACCEPT REQUEST (DONOR)
+=============================
+*/
 export const acceptRequest = async (req, res) => {
 
   try {
 
-    if (req.user.role !== "donor") {
+    if (!req.user.isDonor) {
       return res.status(403).json({
         success: false,
         message: "Only donors can accept requests"
-      });
+      })
     }
 
-    const request = await BloodRequest.findById(req.params.id);
+    const request = await BloodRequest.findById(req.params.id)
 
     if (!request) {
       return res.status(404).json({
         success: false,
         message: "Request not found"
-      });
+      })
     }
 
     if (request.status !== "pending") {
       return res.status(400).json({
         success: false,
         message: "Request already accepted"
-      });
+      })
     }
 
-    request.status = "accepted";
-    request.acceptedBy = req.user.id;
+    request.status = "accepted"
+    request.acceptedBy = req.user.id
 
-    await request.save();
+    await request.save()
 
     res.json({
       success: true,
       message: "Request accepted successfully",
       request
-    });
+    })
 
   } catch (error) {
-
+    console.log(error.message);
+    
     res.status(500).json({
       success: false,
       message: "Server error",
       error: error.message
-    });
+    })
 
   }
 
-};
+}
 
+
+
+/*
+=============================
+MY CREATED REQUESTS
+=============================
+*/
 export const getMyCreatedRequests = async (req, res) => {
+
   try {
 
     const requests = await BloodRequest.find({
       requestedBy: req.user.id
     })
-    .populate("acceptedBy", "name phone")
-    .sort({ createdAt: -1 });
+      .populate("acceptedBy", "name phone")
+      .sort({ createdAt: -1 })
 
     res.json({
       success: true,
       total: requests.length,
       requests
-    });
+    })
 
   } catch (error) {
 
@@ -166,35 +180,41 @@ export const getMyCreatedRequests = async (req, res) => {
       success: false,
       message: "Server error",
       error: error.message
-    });
+    })
 
   }
-};
+
+}
 
 
 
+/*
+=============================
+MY ACCEPTED REQUESTS (DONOR)
+=============================
+*/
 export const getMyAcceptedRequests = async (req, res) => {
 
   try {
 
-    if (req.user.role !== "donor") {
+    if (!req.user.isDonor) {
       return res.status(403).json({
         success: false,
         message: "Only donors can view accepted requests"
-      });
+      })
     }
 
     const requests = await BloodRequest.find({
       acceptedBy: req.user.id
     })
-    .populate("requestedBy", "name phone")
-    .sort({ createdAt: -1 });
+      .populate("requestedBy", "name phone")
+      .sort({ createdAt: -1 })
 
     res.json({
       success: true,
       total: requests.length,
       requests
-    });
+    })
 
   } catch (error) {
 
@@ -202,8 +222,39 @@ export const getMyAcceptedRequests = async (req, res) => {
       success: false,
       message: "Server error",
       error: error.message
-    });
+    })
 
   }
 
-};
+}
+
+
+export const getSingleRequest = async(req,res)=>{
+
+ try{
+
+  const request = await BloodRequest.findById(req.params.id)
+    .populate("requestedBy","name phone")
+    .populate("acceptedBy","name phone")
+
+  if(!request){
+    return res.status(404).json({
+      success:false,
+      message:"Request not found"
+    })
+  }
+
+  res.json({
+    success:true,
+    request
+  })
+
+ }catch(error){
+
+  res.status(500).json({
+    message:"Server error"
+  })
+
+ }
+
+}

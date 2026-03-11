@@ -5,6 +5,8 @@ import connectDB from "./config/db.js"
 import authRouter from "./routes/authRoutes.js"
 import donorRoutes from "./routes/donorRoutes.js"
 import requestRoutes from "./routes/requestRoutes.js"
+import userRoutes from './routes/userRoutes.js'
+import hospitalRoutes from './routes/hospitalRoutes.js'
 
 import cookieParser from "cookie-parser"
 import cors from "cors"
@@ -25,7 +27,7 @@ connectDB()
 
 app.use(
   cors({
-    origin: true,   // allow any domain
+    origin: true,
     credentials: true
   })
 )
@@ -44,7 +46,8 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRouter)
 app.use("/api/donors", donorRoutes)
 app.use("/api/requests", requestRoutes)
-
+app.use("/api/hospital",hospitalRoutes)
+app.use("/api/user" , userRoutes)
 // ==============================
 // SERVER
 // ==============================

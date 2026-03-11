@@ -7,50 +7,52 @@ const bloodGroups = [
   "O+","O-"
 ];
 
-const roles = ["donor", "receiver", "admin"];
+const roles = ["user", "admin", "hospital", "bloodbank"];
 
 const userSchema = new mongoose.Schema({
 
   name: {
     type: String,
-    required: [true, "Name is required"],
+    required: true,
     trim: true,
-    minlength: [3, "Name must be at least 3 characters"],
-    maxlength: [50, "Name cannot exceed 50 characters"]
+    minlength: 3,
+    maxlength: 50
   },
 
   phone: {
     type: String,
-    required: [true, "Phone number is required"],
+    required: true,
     unique: true,
-    match: [/^[6-9]\d{9}$/, "Please enter a valid Indian phone number"]
+    match: [/^[6-9]\d{9}$/, "Enter valid Indian phone"]
   },
 
   email: {
     type: String,
     lowercase: true,
     trim: true,
-    match: [/^\S+@\S+\.\S+$/, "Please enter a valid email"]
+    match: [/^\S+@\S+\.\S+$/, "Invalid email"]
   },
 
   password: {
     type: String,
-    required: [true, "Password is required"],
-    minlength: [6, "Password must be at least 6 characters"]
+    required: true,
+    minlength: 6
   },
 
   role: {
     type: String,
     enum: roles,
-    default: "receiver"
+    default: "user"
   },
 
   bloodGroup: {
     type: String,
-    enum: bloodGroups,
-    required: function () {
-      return this.role === "donor";
-    }
+    enum: bloodGroups
+  },
+
+  isDonor: {
+    type: Boolean,
+    default: false
   },
 
   city: {
@@ -69,16 +71,15 @@ const userSchema = new mongoose.Schema({
       enum: ["Point"],
       default: "Point"
     },
-
     coordinates: {
       type: [Number],
       index: "2dsphere"
     }
   },
 
-  available: {
+  donorAvailability: {
     type: Boolean,
-    default: true
+    default: false
   },
 
   verificationStatus: {
@@ -87,13 +88,9 @@ const userSchema = new mongoose.Schema({
     default: "unverified"
   },
 
-  reportImage: {
-    type: String
-  },
+  reportImage: String,
 
-  lastDonationDate: {
-    type: Date
-  }
+  lastDonationDate: Date
 
 }, { timestamps: true });
 

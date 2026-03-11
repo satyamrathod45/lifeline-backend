@@ -1,24 +1,27 @@
-import express from "express";
+import express from "express"
+import { protect } from "../middleware/authMiddleware.js"
+
 import {
   createRequest,
-  getNearbyRequests,
+  getAllRequests,
   acceptRequest,
   getMyCreatedRequests,
   getMyAcceptedRequests,
-} from "../controllers/requestController.js";
+  getSingleRequest
+} from "../controllers/requestController.js"
 
-import { protect } from "../middleware/authMiddleware.js";
-import { allowRoles } from "../middleware/roleMiddleware.js";
 const router = express.Router()
 
-router.post("/", protect, createRequest);
+router.post("/", protect, createRequest)
 
-router.get("/nearby", protect, getNearbyRequests);
+router.get("/", protect, getAllRequests)
 
-router.patch("/:id/accept", protect, allowRoles("donor"), acceptRequest);
+router.get("/my", protect, getMyCreatedRequests)
 
-router.get("/my-created", protect, getMyCreatedRequests);
+router.get("/accepted", protect, getMyAcceptedRequests)
 
-router.get("/my-accepted", protect, allowRoles("donor"), getMyAcceptedRequests);
+router.patch("/:id/accept", protect, acceptRequest)
 
-export default router;
+router.get("/:id",protect,getSingleRequest)
+
+export default router
