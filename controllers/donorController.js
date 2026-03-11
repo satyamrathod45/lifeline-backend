@@ -1,13 +1,13 @@
 import User from "../models/User.js";
 
 export const getNearbyDonors = async (req, res) => {
+
   try {
 
     const { bloodGroup, city } = req.query;
 
-    let query = {
-      role: "donor",
-      available: true
+    const query = {
+      bloodGroup: { $exists: true, $ne: null }
     };
 
     if (bloodGroup) {
@@ -37,4 +37,5 @@ export const getNearbyDonors = async (req, res) => {
     });
 
   }
+
 };
