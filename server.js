@@ -7,6 +7,7 @@ import donorRoutes from "./routes/donorRoutes.js"
 import requestRoutes from "./routes/requestRoutes.js"
 import userRoutes from './routes/userRoutes.js'
 import hospitalRoutes from './routes/hospitalRoutes.js'
+import adminRoutes from './routes/adminRoutes.js'
 
 import cookieParser from "cookie-parser"
 import cors from "cors"
@@ -34,6 +35,7 @@ app.use(
 
 app.use(express.json())
 app.use(cookieParser())
+app.use(express.static("public"));
 
 // ==============================
 // ROUTES
@@ -48,6 +50,7 @@ app.use("/api/donors", donorRoutes)
 app.use("/api/requests", requestRoutes)
 app.use("/api/hospital",hospitalRoutes)
 app.use("/api/user" , userRoutes)
+app.use("/api/admin" , adminRoutes)
 // ==============================
 // SERVER
 // ==============================

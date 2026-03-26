@@ -1,12 +1,7 @@
 import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
 
-const bloodGroups = [
-  "A+","A-",
-  "B+","B-",
-  "AB+","AB-",
-  "O+","O-"
-];
-
+const bloodGroups = ["A+","A-","B+","B-","AB+","AB-","O+","O-"];
 const roles = ["user", "admin", "hospital", "bloodbank"];
 
 const userSchema = new mongoose.Schema({
@@ -28,6 +23,8 @@ const userSchema = new mongoose.Schema({
 
   email: {
     type: String,
+    required: true,
+    unique: true,
     lowercase: true,
     trim: true,
     match: [/^\S+@\S+\.\S+$/, "Invalid email"]
@@ -55,15 +52,8 @@ const userSchema = new mongoose.Schema({
     default: false
   },
 
-  city: {
-    type: String,
-    trim: true
-  },
-
-  area: {
-    type: String,
-    trim: true
-  },
+  city: String,
+  area: String,
 
   location: {
     type: {
@@ -89,11 +79,20 @@ const userSchema = new mongoose.Schema({
   },
 
   reportImage: String,
+  lastDonationDate: Date,
 
-  lastDonationDate: Date
+  // 🔐 reset fields
+  resetPasswordToken: String,
+  resetPasswordExpire: Date
 
 }, { timestamps: true });
 
 userSchema.index({ location: "2dsphere" });
+
+
+// 🔍 compare password
+userSchema.methods.comparePassword = function (enteredPassword) {
+  return bcrypt.compare(enteredPassword, this.password);
+};
 
 export default mongoose.model("User", userSchema);
