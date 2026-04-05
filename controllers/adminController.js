@@ -56,6 +56,8 @@ export const createHospital = async (req, res) => {
     });
 
   } catch (error) {
+    console.log(error.message);
+    
     res.status(500).json({
       success: false,
       message: "Server error",
@@ -98,100 +100,82 @@ export const getAllHospitals = async (req, res) => {
 
 export const banUser = async (req, res) => {
   try {
-    const { userId } = req.params;
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found"
-      });
-    }
-    user.banned = true;
-    await user.save();
-    res.status(200).json({
-      success: true,
-      message: "User banned successfully"
-    });
+    const user = await User.findByIdAndUpdate(
+      req.params.userId,
+      { isBanned: true },
+      { returnDocument: "after" }
+    );
+
+    res.json({ message: "User banned", user });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Server error",
-      error: error.message
-    });
+    res.status(500).json({ message: error.message });
   }
 };
 
 export const unbanUser = async (req, res) => {
   try {
-    const { userId } = req.params;
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found"
-      });
-    }
-    user.banned = false;
-    await user.save();
-    res.status(200).json({
-      success: true,
-      message: "User unbanned successfully"
-    });
+    const user = await User.findByIdAndUpdate(
+      req.params.userId,
+      { isBanned: false },
+      { returnDocument: "after" }
+    );
+
+    res.json({ message: "User unbanned", user });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Server error",
-      error: error.message
-    });
+    res.status(500).json({ message: error.message });
   }
 };
 
+
+
 export const banHospital = async (req, res) => {
   try {
-    const { hospitalId } = req.params;
-    const hospital = await Hospital.findById(hospitalId);
-    if (!hospital) {
-      return res.status(404).json({
-        success: false,
-        message: "Hospital not found"
-      });
-    }
-    hospital.banned = true;
-    await hospital.save();
-    res.status(200).json({
-      success: true,
-      message: "Hospital banned successfully"
-    });
+    
+    const {id} = req.params;
+    const hospital = await Hospital.findByIdAndUpdate(
+      id,
+      { isBanned: true },
+      { returnDocument: "after" } // ✅ updated
+    );
+    res.json({ message: "Hospital banned", hospital: hospital });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Server error",
-      error: error.message
-    });
+    console.log(error.message);
+    
+    res.status(500).json({ message: error.message });
   }
 };
 
 export const unbanHospital = async (req, res) => {
   try {
-    const { hospitalId } = req.params;
-    const hospital = await Hospital.findById(hospitalId);
-    if (!hospital) {
-      return res.status(404).json({
-        success: false,
-        message: "Hospital not found"
-      });
-    }
-    hospital.banned = false;
-    await hospital.save();
-    res.status(200).json({
-      success: true,
-      message: "Hospital unbanned successfully"
-    });
+    const {id} = req.params;
+    const hospital = await Hospital.findByIdAndUpdate(
+      id,
+      { isBanned: false },
+      { returnDocument: "after" } // ✅ updated
+    );
+
+    res.json({ message: "Hospital unbanned", hospital });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Server error",
-      error: error.message
-    });
+    res.status(500).json({ message: error.message });
+  }
+};
+export const searchUsers = async (req, res) => {
+  try {
+    const { query } = req.query;
+
+    if (!query) {
+      return res.status(400).json({ message: "Search query required" });
+    }
+
+    const users = await User.find({
+      $or: [
+        { name: { $regex: query, $options: "i" } },
+        { email: { $regex: query, $options: "i" } }
+      ]
+    }).select("-password");
+
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };

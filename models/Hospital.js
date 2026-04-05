@@ -46,6 +46,11 @@ const hospitalSchema = new mongoose.Schema({
     }
   },
 
+    isBanned: {
+  type: Boolean,
+  default: false
+},
+
   verified:{
     type:Boolean,
     default:false

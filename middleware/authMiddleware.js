@@ -25,6 +25,9 @@ export const protect = async (req,res,next)=>{
    })
   }
 
+  if (user.isBanned) {
+  return res.status(403).json({ message: "You are banned by admin" });
+}
   req.user = user   // IMPORTANT
 
   next()
@@ -39,3 +42,24 @@ export const protect = async (req,res,next)=>{
  }
 
 }
+
+export const searchUsers = async (req, res) => {
+  try {
+    const { query } = req.query;
+
+    if (!query) {
+      return res.status(400).json({ message: "Search query required" });
+    }
+
+    const users = await User.find({
+      $or: [
+        { name: { $regex: query, $options: "i" } },
+        { email: { $regex: query, $options: "i" } }
+      ]
+    }).select("-password");
+
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
